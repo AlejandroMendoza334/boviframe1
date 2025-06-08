@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "141125428871",
+    "firebase_url": "https://boviframe-default-rtdb.firebaseio.com",
+    "project_id": "boviframe",
+    "storage_bucket": "boviframe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141125428871:android:6794ee38ae3cdd6a867a22",
+        "android_client_info": {
+          "package_name": "com.example.boviframe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141125428871-t0icf6hap6u4037slu73qbvrivg8kh7s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEv4Pwc9-aS0eHJp_Z-RiifBiPFxBmgMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "141125428871-t0icf6hap6u4037slu73qbvrivg8kh7s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "141125428871-7jfclrtqvp72khqjrbsi6qnm6fhtkuj8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.boviframe"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141125428871:android:b4c78f403a5c0ea6867a22",
+        "android_client_info": {
+          "package_name": "com.example.boviframe2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141125428871-t0icf6hap6u4037slu73qbvrivg8kh7s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEv4Pwc9-aS0eHJp_Z-RiifBiPFxBmgMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "141125428871-t0icf6hap6u4037slu73qbvrivg8kh7s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "141125428871-7jfclrtqvp72khqjrbsi6qnm6fhtkuj8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.boviframe"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
