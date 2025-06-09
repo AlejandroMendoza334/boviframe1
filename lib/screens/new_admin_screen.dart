@@ -14,7 +14,7 @@ class NewsAdminScreen extends StatefulWidget {
 
 class _NewsAdminScreenState extends State<NewsAdminScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _authorizedUID = 'bnUwRqbqNPQLOyPZD6wZialhyE82';
+  final String _authorizedUID = 'p9HOIe0bhuXKCXtLonmO2DXIQyf2';
 
   Future<void> _deleteNews(String docId) async {
     try {

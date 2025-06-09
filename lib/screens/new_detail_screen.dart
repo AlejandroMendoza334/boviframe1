@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class NewsDetailScreen extends StatefulWidget {
   final String documentId;
@@ -53,14 +52,16 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     }
   }
 
-  void _openWebView(BuildContext context) {
+  Future<void> _openExternalUrl() async {
     if (_externalUrl == null) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WebViewScreen(url: _externalUrl!),
-      ),
-    );
+    final uri = Uri.parse(_externalUrl!);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.platformDefault); // ✅ importante para web
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo abrir la URL: $_externalUrl')),
+      );
+    }
   }
 
   @override
@@ -126,7 +127,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               ),
               const SizedBox(height: 8),
               ElevatedButton(
-                onPressed: () => _openWebView(context),
+                onPressed: _openExternalUrl,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[800],
                   foregroundColor: Colors.white,
@@ -145,26 +146,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class WebViewScreen extends StatelessWidget {
-  final String url;
-  const WebViewScreen({super.key, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(url));
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contenido Web'),
-        backgroundColor: Colors.blue.shade800,
-      ),
-      body: WebViewWidget(controller: controller),
     );
   }
 }

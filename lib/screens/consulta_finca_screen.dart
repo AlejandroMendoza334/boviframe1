@@ -13,7 +13,6 @@ class ConsultaFincaScreen extends StatefulWidget {
 class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
   bool _loading = true;
   String? _error;
-
   List<Map<String, dynamic>> _fincas = [];
 
   @override
@@ -42,13 +41,11 @@ class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
       _error = null;
       _fincas.clear();
     });
-
     try {
       final snapshot = await FirebaseFirestore.instance
           .collectionGroup('datos_productor')
           .get();
 
-      // Primero construimos una lista plana de sesiones con su finca:
       final lista = <Map<String, dynamic>>[];
       for (var doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
@@ -56,16 +53,16 @@ class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
         if (parentCol == null) continue;
         final sessionId = parentCol.id;
         final parentSnap = await parentCol.get();
-        final numeroSesion = (parentSnap.data()?['numero_sesion'] ?? '').toString();
+        final numeroSesion =
+            (parentSnap.data()?['numero_sesion'] ?? '').toString();
         lista.add({
           'unidad_produccion': data['unidad_produccion'] ?? '',
-          'ubicacion'        : data['ubicacion']          ?? '',
-          'session_id'       : sessionId,
-          'numero_sesion'    : numeroSesion,
+          'ubicacion': data['ubicacion'] ?? '',
+          'session_id': sessionId,
+          'numero_sesion': numeroSesion,
         });
       }
 
-      // Ahora agrupamos por 'unidad_produccion'
       final Map<String, Map<String, dynamic>> mapa = {};
       for (var item in lista) {
         final finca = item['unidad_produccion'] as String;
@@ -88,9 +85,52 @@ class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
       });
     } catch (e) {
       setState(() {
-        _error   = 'Error cargando fincas: $e';
+        _error = 'Error cargando fincas: $e';
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _confirmDeleteFinca(String unidad, List<Map<String, String>> sesiones) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Borrar finca'),
+        content: Text('¿Eliminar la finca "$unidad" definitivamente?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await _deleteFinca(unidad, sesiones);
+    }
+  }
+
+  Future<void> _deleteFinca(String unidad, List<Map<String, String>> sesiones) async {
+    setState(() { _loading = true; });
+    try {
+      for (var ses in sesiones) {
+        final sessionId = ses['session_id']!;
+        final col = FirebaseFirestore.instance
+            .collection('sesiones')
+            .doc(sessionId)
+            .collection('datos_productor');
+        final snap = await col.where('unidad_produccion', isEqualTo: unidad).get();
+        for (var doc in snap.docs) {
+          await doc.reference.delete();
+        }
+      }
+      await _cargarTodasLasFincas();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Finca "$unidad" eliminada correctamente'))
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar: $e'), backgroundColor: Colors.red)
+      );
+      setState(() { _loading = false; });
     }
   }
 
@@ -98,14 +138,8 @@ class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true, // <-- centro el título
-        title: const Text(
-          'Consulta Fincas',
-          style: TextStyle(
-            color: Colors.white, // <-- texto en blanco
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        centerTitle: true,
+        title: const Text('Consulta Fincas', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue[800],
       ),
       body: SafeArea(
@@ -121,73 +155,76 @@ class _ConsultaFincaScreenState extends State<ConsultaFincaScreen> {
             ],
             Expanded(
               child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _fincas.isEmpty
-                  ? const Center(child: Text('No hay datos de productor.'))
-                  : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemCount: _fincas.length,
-                      itemBuilder: (ctx, i) {
-                        final finca = _fincas[i];
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            // Navegamos a SesionesScreen pasando finca y sesiones:
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SesionesScreen(
-                                  finca: finca['unidad_produccion'] as String,
-                                  sesiones: List<Map<String, String>>.from(
-                                    finca['sesiones'] as List
-                                  ),
+                  ? const Center(child: CircularProgressIndicator())
+                  : _fincas.isEmpty
+                      ? const Center(child: Text('No hay datos de productor.'))
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          itemCount: _fincas.length,
+                          itemBuilder: (ctx, i) {
+                            final finca = _fincas[i];
+                            final sessions = List<Map<String, String>>.from(finca['sesiones'] as List);
+                            return Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.domain, size: 20),
+                                        const SizedBox(width: 8),
+                                        const Text('Finca:', style: TextStyle(fontWeight: FontWeight.w600)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(finca['unidad_produccion'] as String)),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete_forever, color: Colors.red),
+                                          onPressed: () => _confirmDeleteFinca(finca['unidad_produccion'] as String, sessions),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on, size: 20),
+                                        const SizedBox(width: 8),
+                                        const Text('Ubicación:', style: TextStyle(fontWeight: FontWeight.w600)),
+                                        const SizedBox(width: 8),
+                                        Expanded(child: Text(finca['ubicacion'] as String)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Sesiones: ${sessions.length}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => SesionesScreen(
+                                                finca: finca['unidad_produccion'] as String,
+                                                sesiones: sessions,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text('Ver sesiones'),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
                           },
-                          child: Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.domain, size: 20),
-                                      const SizedBox(width: 8),
-                                      const Text('Finca:',
-                                          style: TextStyle(fontWeight: FontWeight.w600)),
-                                      const SizedBox(width: 8),
-                                      Expanded(child: Text(finca['unidad_produccion'])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 20),
-                                      const SizedBox(width: 8),
-                                      const Text('Ubicación:',
-                                          style: TextStyle(fontWeight: FontWeight.w600)),
-                                      const SizedBox(width: 8),
-                                      Expanded(child: Text(finca['ubicacion'])),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Sesiones: ${(finca['sesiones'] as List).length}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                        ),
             ),
           ],
         ),

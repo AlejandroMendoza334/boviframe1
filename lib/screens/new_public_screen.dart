@@ -19,7 +19,7 @@ class _NewsPublicScreenState extends State<NewsPublicScreen> {
   bool get _isAdmin {
     final user = _auth.currentUser;
     if (user == null) return false;
-    return user.uid == 'bnUwRqbqNPQLOyPZD6wZialhyE82';
+    return user.uid == 'p9HOIe0bhuXKCXtLonmO2DXIQyf2';
   }
 
   @override

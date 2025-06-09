@@ -142,7 +142,7 @@ class MainMenu extends StatelessWidget {
                       context: context,
                       label: 'Consulta',
                       subtext: 'Consulta todo sobre las Epmuras',
-                      imagePath: 'img/boton_consulta.png',
+                      imagePath: 'img/boton_consulta.jpg',
                       route: '/consulta',
                     ),
                     buildDashboardButton(

@@ -14,6 +14,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw; // pw.Document, pw.Table, pw.Text, etc.
 import 'package:printing/printing.dart';
+import '../../services/pdf_service.dart';
 
 import '../providers/session_provider.dart';
 import '../providers/settings_provider.dart';
@@ -842,21 +843,15 @@ void _calcularPesoAjustado() {
                                         ),
                                         tooltip: 'Descargar PDF',
                                         onPressed: () async {
-                                          // 1) Cerramos PRIMERO el AlertDialog
                                           Navigator.of(context).pop();
-
-                                          // 2) Esperamos un micro‐delay
                                           await Future.delayed(
                                             const Duration(
                                                 milliseconds: 100),
                                           );
-
-                                          // 3) Debug: confirma que m trae todos los datos
                                           debugPrint(
                                             '[DEBUG] Datos a exportar: $m',
                                           );
 
-                                          // 4) Ahora sí lanzamos la generación/​descarga del PDF
                                           await _printOrSharePDF(m);
                                         },
                                       ),
@@ -1528,23 +1523,23 @@ const SizedBox(height: 12),
           const SizedBox(width: 8),
           // Contenedor con tamaño fijo
           SizedBox(
-            width: 60,    
-            height: 48,   
+            width: 80,    
+            height: 47,   
             child: DropdownButtonFormField<String>(
               isExpanded: true,
               style: TextStyle(fontSize: 18, color: Colors.black),
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
                 border: OutlineInputBorder(),
               ),
-              iconSize: 20,          
+              iconSize: 30,          
               itemHeight: 48,        
               items: List.generate(
                 maxItems,
                 (i) => DropdownMenuItem(
                   value: '${i + 1}',
-                  child: Center(child: Text('${i + 1}', style: TextStyle(fontSize: 18))),
+                  child: Center(child: Text('${i + 1}', style: TextStyle(fontSize: 17))),
                 ),
               
                 ),

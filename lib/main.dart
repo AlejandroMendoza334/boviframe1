@@ -104,7 +104,6 @@ class MyApp extends StatelessWidget {
             '/consulta_finca': (_) =>  ConsultaFincaScreen(),
             '/animal_evaluation': (_) =>  AnimalEvaluationScreen(),
             '/theory': (_) =>  EpmurasInfographicWidget(),
-            '/dashboard': (_) =>  DashboardScreen(),
             '/editar_finca': (_) =>  EditarFincaScreen(),
             '/edit_session_selector': (_) =>  EditSessionSelectorScreen(),
           },
